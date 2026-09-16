@@ -1,14 +1,11 @@
 <?php
 
-<<<<<<< HEAD
-use App\Http\Controllers\TaskController;
-=======
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AuthController;
->>>>>>> origin/feature/user-admin
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskListController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -26,9 +23,7 @@ Route::middleware('guest')->group(function () {
 
 // Hanya untuk yang SUDAH login.
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
@@ -62,6 +57,4 @@ Route::middleware('auth')->group(function () {
     Route::resource('task-lists', TaskListController::class)
          ->except(['edit', 'update']);   // hanya endpoint yang ada di SRS
 });
-
-Route::get('/dashboard', [DashboardController::class, 'index']);
 
