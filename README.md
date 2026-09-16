@@ -1,58 +1,123 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Jara — Task Management App
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi manajemen tugas kolaboratif berbasis Laravel: project + daftar tugas (task list) + task,
+dengan model kepemilikan **owner–anggota**. Owner membuat task/project/daftar tugas, menambahkan
+anggota dari user lain, dan hanya owner yang bisa edit/hapus/kelola anggota. Anggota bisa melihat
+dan mengubah status.
 
-## About Laravel
+Dokumen perencanaan tim ada di folder [`Panduan/`](Panduan/) (SRS, pembagian tugas, panduan merge).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Fitur
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Auth** — register, login, logout. Role `admin` / `user` (register selalu jadi `user`).
+- **Dashboard** — progres + metrik task milik user (owner atau anggota), deadline terdekat, overdue.
+- **Projects** — CRUD project; owner dari sesi login; tambah/hapus anggota (owner tidak bisa dihapus).
+- **Daftar Tugas (Task Lists)** — buat daftar sebagai pemilik; hapus daftar + keanggotaan atomik (transaksi);
+  otorisasi via `TaskListPolicy`.
+- **Tasks** — CRUD task; owner = `created_by`; tambah/hapus anggota task; anggota bisa ubah status;
+  edit/hapus/kelola anggota khusus owner.
+- **Admin** — kelola user (lihat, tambah dengan role, hapus; tidak bisa hapus diri sendiri).
+- **UI** — Blade + Tailwind, layout terpadu, brand "Jara", transisi fade antar halaman.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## SRS (ringkas)
 
-## Learning Laravel
+Spesifikasi lengkap: [`Panduan/SRS-Fitur-Tambahan.md`](Panduan/SRS-Fitur-Tambahan.md).
+Pembagian kerja tim: [`Panduan/Pembagian-Tugas.md`](Panduan/Pembagian-Tugas.md).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Kode | Requirement |
+|------|-------------|
+| FR-01 | User login bisa membuat daftar tugas baru; `owner_id` selalu dari `auth()->id()`, tidak pernah dari request body. |
+| FR-02 | Hanya pemilik bisa menghapus daftar + seluruh keanggotaannya; non-owner → 403, id tidak ada → 404, guest → redirect login. |
+| NFR-01 | Setiap proses tulis atomik (`DB::transaction`): gagal di satu langkah → seluruh perubahan rollback. |
+| NFR-02 | Request tidak berwenang ditolak: route di balik `auth`, kepemilikan via Policy / cek owner eksplisit. |
+| NFR-03 | Seluruh input divalidasi (`FormRequest` / `$request->validate`), query via Eloquent terparameterisasi — tanpa raw query berinterpolasi (anti SQL injection). |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Aturan owner–anggota task (hasil penyederhanaan setelah merge):
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- Owner = `tasks.created_by`. Owner otomatis jadi anggota (`task_user`).
+- Owner: CRUD penuh + tambah/hapus anggota + hapus task (hilang dari semua anggota).
+- Anggota: lihat + ubah status saja. Non-anggota: 403 dan task tidak muncul di index.
 
-## Agentic Development
+## Tech Stack
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+| Lapisan | Teknologi |
+|---------|-----------|
+| Bahasa | PHP 8.5 |
+| Framework | Laravel 13.31 |
+| Database | SQLite (default lokal, `database/database.sqlite`); migrasi standar, gampang pindah ke MySQL/Postgres via `.env` |
+| Frontend | Blade + Tailwind CSS (CDN di layout) + Alpine.js (komponen inline) + Vite build (`resources/css`, `resources/js`) |
+| Auth | Session bawaan Laravel + middleware `auth`, `guest`, custom `admin` |
+| Testing | Pest 5 + PHPUnit 13 (`tests/Feature`, `tests/Unit`) |
+| Dev tools | Laravel Boost, Pail, Pint |
+
+Skema DB utama: `users(role)`, `projects` + `project_user`, `task_lists` + `task_list_user`,
+`tasks(project_id, created_by, title, description, priority, status, due_date)` + `task_user`.
+
+## Cara Instalasi
+
+Prasyarat: PHP ≥ 8.3 (dengan ekstensi `pdo_sqlite`), Composer, Node.js + npm.
 
 ```bash
-composer require laravel/boost --dev
+git clone <repo-url> Pertemuan2
+cd Pertemuan2
 
-php artisan boost:install
+composer install
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite
+
+php artisan migrate:fresh --seed   # seed demo: 10 user, 6 project, 8 daftar tugas, 40 task
+npm install
+npm run build                      # atau: npm run dev (saat ngoding, dengan Vite HMR)
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Jalankan server:
 
-## Contributing
+```bash
+php artisan serve   # http://127.0.0.1:8000
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Akun demo (password semua: `password`):
 
-## Code of Conduct
+| Email | Role |
+|-------|------|
+| `admin@jara.test` | admin |
+| `dhimas@jara.test` | user |
+| `Elang@jara.test`, `fazl@jara.test`, `ferdy@jara.test` | user |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+> Catatan: `database/database.sqlite` dan `.env` tidak di-track git (lihat `.gitignore`),
+> jadi tiap clone baru wajib `migrate:fresh --seed`.
 
-## Security Vulnerabilities
+## Perintah Penting
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan test            # full test suite (Pest)
+php artisan route:list      # daftar route
+php artisan migrate:fresh --seed   # reset DB + isi dummy
+npm run dev                 # Vite dev server (HMR)
+npm run build               # build aset produksi ke public/build
+```
 
-## License
+## Struktur Kode
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+app/Http/Controllers/   Auth, Dashboard, Project, Task, TaskList, Admin/User
+app/Http/Requests/      StoreTaskListRequest (validasi FR-01)
+app/Http/Middleware/    AdminMiddleware (cek role admin)
+app/Models/             User, Project, Task, TaskList
+app/Policies/           TaskListPolicy (view/create/delete)
+app/Providers/          AppServiceProvider (registrasi policy)
+routes/web.php          semua route (auth, admin, projects, task-lists, tasks)
+resources/views/        layouts/{app,guest}, dashboard, tasks/, task-lists/,
+                        projects/, auth/, admin/
+database/migrations/    10 migrasi (users s/d task_list_user)
+database/seeders/       DatabaseSeeder (data dummy tim + 40 task)
+tests/Feature/          StoreTaskListTest, TaskListSecurityTest,
+                        TaskOwnershipTest, ExampleTest
+Panduan/                SRS, pembagian tugas, panduan merge (dokumen tim)
+```
+
+## Tim
+
+PM: Dhimas (merge + SRS). Anggota: Elang (FR-01 create), Fazl (FR-02 delete + atomik),
+Ferdy (otorisasi + hardening keamanan). Detail: `Panduan/Pembagian-Tugas.md`.
