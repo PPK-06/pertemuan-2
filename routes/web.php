@@ -1,13 +1,11 @@
 <?php
 
-<<<<<<< HEAD
-use App\Http\Controllers\TaskController;
-=======
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AuthController;
->>>>>>> origin/feature/user-admin
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskListController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -48,6 +46,17 @@ Route::middleware('auth')->group(function () {
     Route::resource('tasks', TaskController::class);
     Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])
         ->name('tasks.status');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Task List Routes - FR-01 (feature/tasklist-create)
+|--------------------------------------------------------------------------
+| Route destroy belum didaftarkan di sini, menyusul di FR-02.
+*/
+Route::middleware('auth')->group(function () {
+    Route::resource('task-lists', TaskListController::class)
+        ->only(['index', 'create', 'store', 'show']);
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index']);
