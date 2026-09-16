@@ -119,5 +119,11 @@ Panduan/                SRS, pembagian tugas, panduan merge (dokumen tim)
 
 ## Tim
 
-PM: Dhimas (merge + SRS). Anggota: Elang (FR-01 create), Fazl (FR-02 delete + atomik),
-Ferdy (otorisasi + hardening keamanan). Detail: `Panduan/Pembagian-Tugas.md`.
+| Nama | NIM |
+|------|-----|
+| Dhimas Reza Nafi Wahyudi | 24060124120010 |
+| Ferdy Prasetya Putra | 24060124140145 |
+| Elang Fadila Ahmad | 24060124130108 |
+| Fazl Nizam Priyambodho | 24060124130121 |
+
+Detail pembagian kerja: `Panduan/Pembagian-Tugas.md`.
