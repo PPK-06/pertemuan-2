@@ -1,19 +1,51 @@
-﻿<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>Buat Project</title></head>
-<body>
-<h1>Buat Project Baru</h1>
-@if($errors->any())
-@foreach($errors->all() as $error)<p style="color:red">{{ $error }}</p>@endforeach
-@endif
-<form action="{{ route('projects.store') }}" method="POST">
-@csrf
-<label>Nama Project</label><br>
-<input type="text" name="name" required><br><br>
-<label>Deskripsi</label><br>
-<textarea name="description"></textarea><br><br>
-<button type="submit">Simpan</button>
-</form><br>
-<a href="{{ route('projects.index') }}">Kembali</a>
-</body></html>
+﻿@extends('layouts.app')
 
+@section('title', 'Buat Project')
+@section('header', '➕ Buat Project Baru')
+@section('subheader', 'Kamu otomatis jadi owner project yang kamu buat.')
+
+@section('content')
+<div class="max-w-xl">
+    <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+        <form action="{{ route('projects.store') }}" method="POST" class="space-y-5">
+            @csrf
+
+            <div>
+                <label for="name" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                    Nama Project <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="name" id="name" value="{{ old('name') }}"
+                       placeholder="Contoh: Website JARA" required
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+                              {{ $errors->has('name') ? 'border-red-400 ring-1 ring-red-400' : '' }}">
+                @error('name')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                    Deskripsi
+                </label>
+                <textarea name="description" id="description" rows="3"
+                          placeholder="Opsional — jelaskan project ini"
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">{{ old('description') }}</textarea>
+                @error('description')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="flex items-center gap-3 pt-2">
+                <button type="submit"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-6 py-2.5 rounded-lg transition">
+                    Simpan
+                </button>
+                <a href="{{ route('projects.index') }}"
+                   class="text-sm text-gray-500 hover:text-gray-700 transition font-medium">
+                    Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+@endsection

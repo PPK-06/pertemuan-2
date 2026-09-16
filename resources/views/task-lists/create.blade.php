@@ -1,57 +1,51 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Buat Daftar Tugas - JARA</title>
-    <style>
-        :root { --ink:#1c1f26; --muted:#6b7280; --line:#d8dbe0; --bg:#f6f6f4; --accent:#2f5d50; --danger:#a3352b; }
-        * { box-sizing:border-box; }
-        body { margin:0; background:var(--bg); color:var(--ink);
-               font-family:-apple-system,"Segoe UI",Roboto,sans-serif; padding:40px 24px; }
-        .wrap { max-width:560px; margin:0 auto; }
-        .card { background:#fff; border:1px solid var(--line); padding:32px; }
-        h1 { margin:0 0 4px; font-size:24px; font-weight:600; }
-        .sub { margin:0 0 24px; color:var(--muted); font-size:14px; }
-        label { display:block; font-size:14px; margin-bottom:6px; }
-        input, textarea { width:100%; padding:10px 12px; margin-bottom:4px; border:1px solid var(--line);
-                background:#fff; font-size:15px; font-family:inherit; }
-        textarea { min-height:110px; resize:vertical; }
-        input:focus, textarea:focus { outline:2px solid var(--accent); outline-offset:1px; }
-        .field { margin-bottom:16px; }
-        .err { color:var(--danger); font-size:13px; }
-        button { padding:10px 16px; background:var(--accent); color:#fff; border:0;
-                 font-size:14px; font-family:inherit; cursor:pointer; }
-        .foot { margin-top:20px; font-size:14px; color:var(--muted); }
-        a { color:var(--accent); }
-    </style>
-</head>
-<body>
-    <div class="wrap">
-        <div class="card">
-            <h1>Buat Daftar Tugas</h1>
-            <p class="sub">Kamu otomatis jadi pemilik daftar tugas yang kamu buat.</p>
+@extends('layouts.app')
 
-            <form method="POST" action="{{ route('task-lists.store') }}">
-                @csrf
+@section('title', 'Buat Daftar Tugas')
+@section('header', '➕ Buat Daftar Tugas')
+@section('subheader', 'Kamu otomatis jadi pemilik daftar tugas yang kamu buat.')
 
-                <div class="field">
-                    <label for="name">Nama</label>
-                    <input id="name" type="text" name="name" value="{{ old('name') }}" required>
-                    @error('name') <span class="err">{{ $message }}</span> @enderror
-                </div>
+@section('content')
+<div class="max-w-xl">
+    <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+        <form method="POST" action="{{ route('task-lists.store') }}" class="space-y-5">
+            @csrf
 
-                <div class="field">
-                    <label for="description">Deskripsi <span class="sub">(opsional)</span></label>
-                    <textarea id="description" name="description">{{ old('description') }}</textarea>
-                    @error('description') <span class="err">{{ $message }}</span> @enderror
-                </div>
+            <div>
+                <label for="name" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                    Nama <span class="text-red-500">*</span>
+                </label>
+                <input id="name" type="text" name="name" value="{{ old('name') }}" required
+                       placeholder="Contoh: Belanja Mingguan"
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+                              {{ $errors->has('name') ? 'border-red-400 ring-1 ring-red-400' : '' }}">
+                @error('name')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
 
-                <button type="submit">Simpan</button>
-            </form>
+            <div>
+                <label for="description" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                    Deskripsi <span class="text-gray-400 font-normal">(opsional)</span>
+                </label>
+                <textarea id="description" name="description" rows="3"
+                          placeholder="Jelaskan isi daftar tugas ini"
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">{{ old('description') }}</textarea>
+                @error('description')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
 
-            <p class="foot"><a href="{{ route('task-lists.index') }}">&larr; Kembali ke daftar</a></p>
-        </div>
+            <div class="flex items-center gap-3 pt-2">
+                <button type="submit"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-6 py-2.5 rounded-lg transition">
+                    Simpan
+                </button>
+                <a href="{{ route('task-lists.index') }}"
+                   class="text-sm text-gray-500 hover:text-gray-700 transition font-medium">
+                    Batal
+                </a>
+            </div>
+        </form>
     </div>
-</body>
-</html>
+</div>
+@endsection

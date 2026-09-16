@@ -70,7 +70,7 @@
                     @endforeach
                 </div>
             @else
-                <p class="text-gray-400 text-sm italic">Belum ada assignee. Orang 3 (Project & Team) akan menambahkan dari halaman project.</p>
+                <p class="text-gray-400 text-sm italic">Belum ada assignee.</p>
             @endif
         </div>
 

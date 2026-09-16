@@ -1,92 +1,80 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $taskList->name }} - JARA</title>
-    <style>
-        :root { --ink:#1c1f26; --muted:#6b7280; --line:#d8dbe0; --bg:#f6f6f4; --accent:#2f5d50; --danger:#a3352b; }
-        * { box-sizing:border-box; }
-        body { margin:0; background:var(--bg); color:var(--ink);
-               font-family:-apple-system,"Segoe UI",Roboto,sans-serif; padding:40px 24px; }
-        .wrap { max-width:720px; margin:0 auto; }
-        .card { background:#fff; border:1px solid var(--line); padding:32px; }
-        .card + .card { margin-top:24px; }
-        h1 { margin:0 0 4px; font-size:24px; font-weight:600; }
-        h2 { margin:0 0 16px; font-size:18px; font-weight:600; }
-        .sub { margin:0 0 24px; color:var(--muted); font-size:14px; }
-        .ok { margin:0 0 16px; padding:10px 12px; border:1px solid var(--accent);
-              color:var(--accent); font-size:14px; }
-        .meta { font-size:14px; line-height:1.7; }
-        .meta dt { color:var(--muted); }
-        .meta dd { margin:0 0 12px; }
-        table { width:100%; border-collapse:collapse; font-size:14px; }
-        th, td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--line); }
-        th { color:var(--muted); font-weight:600; }
-        .muted { color:var(--muted); }
-        a { color:var(--accent); }
-    </style>
-</head>
-<body>
-    <div class="wrap">
-        <div class="card">
-            @if (session('success'))
-                <p class="ok">{{ session('success') }}</p>
+@extends('layouts.app')
+
+@section('title', $taskList->name)
+@section('header', $taskList->name)
+@section('subheader', 'Detail daftar tugas beserta anggotanya.')
+@section('action')
+    <a href="{{ route('task-lists.index') }}"
+       class="text-sm text-gray-500 hover:text-gray-700 transition font-medium">
+        ← Kembali ke daftar
+    </a>
+@endsection
+
+@section('content')
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    {{-- Info utama --}}
+    <div class="lg:col-span-2 space-y-5">
+        <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">Deskripsi</h2>
+            @if ($taskList->description)
+                <p class="text-gray-700 text-sm leading-relaxed">{{ $taskList->description }}</p>
+            @else
+                <p class="text-gray-400 text-sm italic">Tidak ada deskripsi.</p>
             @endif
-
-            <h1>{{ $taskList->name }}</h1>
-            <p class="sub"><a href="{{ route('task-lists.index') }}">&larr; Kembali ke daftar tugas</a></p>
-
-            @can('delete', $taskList)
-                <form method="POST" action="{{ route('task-lists.destroy', $taskList) }}" style="margin-bottom:24px">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" style="padding:10px 16px;background:#a3352b;color:#fff;border:0;font-size:14px;cursor:pointer" onclick="return confirm('Hapus daftar tugas ini beserta seluruh keanggotaannya?')">Hapus Daftar Tugas</button>
-                </form>
-            @endcan
-
-            <dl class="meta">
-                <dt>Deskripsi</dt>
-                <dd>
-                    @if ($taskList->description)
-                        {{ $taskList->description }}
-                    @else
-                        <span class="muted">Tidak ada deskripsi.</span>
-                    @endif
-                </dd>
-
-                <dt>Pemilik</dt>
-                <dd>{{ $taskList->owner->name }}</dd>
-
-                <dt>Dibuat</dt>
-                <dd>{{ $taskList->created_at->format('d M Y H:i') }}</dd>
-            </dl>
         </div>
 
-        <div class="card">
-            <h2>Anggota</h2>
-
+        <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
+                Anggota ({{ $taskList->members->count() }})
+            </h2>
             @if ($taskList->members->isEmpty())
-                <p class="muted" style="font-size:14px">Belum ada anggota.</p>
+                <p class="text-gray-400 text-sm italic">Belum ada anggota.</p>
             @else
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nama</th>
-                            <th>Email</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($taskList->members as $member)
-                            <tr>
-                                <td>{{ $member->name }}</td>
-                                <td>{{ $member->email }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                <div class="flex flex-wrap gap-2">
+                    @foreach ($taskList->members as $member)
+                        <div class="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full text-sm font-medium">
+                            <div class="w-5 h-5 rounded-full bg-indigo-200 flex items-center justify-center text-xs font-bold">
+                                {{ strtoupper(substr($member->name, 0, 1)) }}
+                            </div>
+                            {{ $member->name }}
+                            @if ($member->id === $taskList->owner_id)
+                                <span class="text-xs font-bold">· Owner</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
             @endif
         </div>
     </div>
-</body>
-</html>
+
+    {{-- Meta & aksi --}}
+    <div class="space-y-5">
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm space-y-4 text-sm">
+            <div>
+                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Pemilik</div>
+                <div class="font-medium text-gray-700">{{ $taskList->owner->name }}</div>
+            </div>
+            <div>
+                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Dibuat</div>
+                <div class="text-gray-500">{{ $taskList->created_at->format('d M Y, H:i') }}</div>
+            </div>
+        </div>
+
+        @can('delete', $taskList)
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+            <form method="POST" action="{{ route('task-lists.destroy', $taskList) }}"
+                  onsubmit="return confirm('Hapus daftar tugas ini beserta seluruh keanggotaannya?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                        class="flex items-center justify-center w-full border border-red-300 text-red-500 hover:bg-red-50 font-semibold text-sm px-4 py-2.5 rounded-lg transition">
+                    🗑 Hapus Daftar Tugas
+                </button>
+            </form>
+        </div>
+        @endcan
+    </div>
+
+</div>
+@endsection
