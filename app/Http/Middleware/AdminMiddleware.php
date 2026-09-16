@@ -15,6 +15,13 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Hanya user dengan role 'admin' yang boleh lewat. Middleware ini
+        // dipasang bareng 'auth' di route group, jadi $request->user()
+        // seharusnya selalu ada, tapi tetap dicek untuk jaga-jaga.
+        if (! $request->user() || $request->user()->role !== 'admin') {
+            abort(403);
+        }
+
         return $next($request);
     }
 }
