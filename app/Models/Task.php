@@ -26,6 +26,15 @@ class Task extends Model
         ];
     }
 
+    /**
+     * Alias boolean untuk UI: true jika status done.
+     * Memungkinkan Blade memakai $task->completed walau kolom DB-nya status.
+     */
+    public function getCompletedAttribute(): bool
+    {
+        return $this->status === 'done';
+    }
+
     public function project()
     {
         return $this->belongsTo(Project::class);

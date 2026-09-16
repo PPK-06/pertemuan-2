@@ -24,7 +24,11 @@ class TaskController extends Controller
             ->latest()
             ->get();
 
-        return view('tasks.index', compact('tasks'));
+        $projects = Project::where('owner_id', auth()->id())
+            ->orWhereHas('members', fn ($q) => $q->where('users.id', auth()->id()))
+            ->get();
+
+        return view('tasks.index', compact('tasks', 'projects'));
     }
 
     /**
@@ -49,16 +53,18 @@ class TaskController extends Controller
             'project_id'  => ['required', 'exists:projects,id'],
             'title'       => ['required', 'max:255'],
             'description' => ['nullable', 'string'],
-            'priority'    => ['required', 'in:low,medium,high'],
-            'status'      => ['required', 'in:todo,in_progress,done'],
+            'priority'    => ['sometimes', 'in:low,medium,high'],
+            'status'      => ['sometimes', 'in:todo,in_progress,done'],
             'due_date'    => ['nullable', 'date'],
         ]);
 
+        $data['priority'] ??= 'medium';
+        $data['status'] ??= 'todo';
         $data['created_by'] = auth()->id();
 
         $task = Task::create($data);
 
-        return redirect()->route('tasks.show', $task)
+        return redirect()->route('tasks.index')
             ->with('success', 'Task berhasil dibuat.');
     }
 
