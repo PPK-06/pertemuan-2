@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskListController;
 use Illuminate\Support\Facades\Route;
@@ -58,3 +59,21 @@ Route::middleware('auth')->group(function () {
          ->except(['edit', 'update']);   // hanya endpoint yang ada di SRS
 });
 
+/*
+|--------------------------------------------------------------------------
+| Project & Team Collaboration Routes (feature/project-team-wip)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::resource('projects', ProjectController::class);
+
+    Route::post(
+        '/projects/{project}/members',
+        [ProjectController::class, 'addMember']
+    )->name('projects.members.add');
+
+    Route::delete(
+        '/projects/{project}/members/{user}',
+        [ProjectController::class, 'removeMember']
+    )->name('projects.members.remove');
+});
