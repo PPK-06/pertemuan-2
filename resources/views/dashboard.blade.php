@@ -12,6 +12,9 @@
         dl { display:grid; grid-template-columns:120px 1fr; gap:8px 16px; margin:0; font-size:15px; }
         dt { color:#6b7280; }
         dd { margin:0; }
+        button { padding:10px 16px; background:#2f5d50; color:#fff; border:0;
+                 font-size:14px; font-family:inherit; cursor:pointer; }
+        a { color:#2f5d50; }
     </style>
 </head>
 <body>
@@ -21,6 +24,15 @@
             <dt>Email</dt><dd>{{ auth()->user()->email }}</dd>
             <dt>Role</dt><dd>{{ auth()->user()->role }}</dd>
         </dl>
+
+        @if (auth()->user()->role === 'admin')
+            <p style="margin-top:24px;"><a href="/admin/users">Manage Users</a></p>
+        @endif
+
+        <form method="POST" action="/logout" style="margin-top:16px;">
+            @csrf
+            <button type="submit">Keluar</button>
+        </form>
     </div>
 </body>
 </html>

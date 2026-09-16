@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -45,5 +46,55 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return redirect()->route('dashboard');
+    }
+
+    /**
+     * Menampilkan form login.
+     */
+    public function showLogin()
+    {
+        return view('auth.login');
+    }
+
+    /**
+     * Memproses data dari form login.
+     */
+    public function login(Request $request)
+    {
+        // 1. Validasi format input dulu (bukan validasi kredensial).
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        // 2. Coba autentikasi. Kalau gagal, lempar ValidationException
+        //    supaya Laravel redirect back dengan pesan error + old input,
+        //    sama seperti perilaku $request->validate() di atas.
+        if (! Auth::attempt($credentials)) {
+            throw ValidationException::withMessages([
+                'email' => 'Email atau password salah.',
+            ]);
+        }
+
+        // 3. Regenerate session id supaya tidak kena session fixation,
+        //    lalu arahkan ke halaman yang tadinya ingin diakses (kalau ada).
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('dashboard'));
+    }
+
+    /**
+     * Memproses logout.
+     */
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        // Invalidate + regenerate token supaya session lama benar-benar
+        // tidak bisa dipakai lagi (mencegah session fixation/replay).
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
     }
 }
