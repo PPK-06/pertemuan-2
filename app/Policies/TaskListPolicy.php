@@ -8,11 +8,15 @@ use App\Models\User;
 class TaskListPolicy
 {
     /**
-     * Hanya owner yang boleh melihat task list miliknya.
+     * Owner dan anggota boleh melihat daftar tugas.
      */
     public function view(User $user, TaskList $taskList): bool
     {
-        return $user->id === $taskList->owner_id;
+        if ($user->id === $taskList->owner_id) {
+            return true;
+        }
+
+        return $taskList->members()->where('users.id', $user->id)->exists();
     }
 
     /**
@@ -21,5 +25,13 @@ class TaskListPolicy
     public function create(User $user): bool
     {
         return true;
+    }
+
+    /**
+     * Hanya owner yang boleh menghapus daftar tugas miliknya.
+     */
+    public function delete(User $user, TaskList $taskList): bool
+    {
+        return $user->id === $taskList->owner_id;
     }
 }

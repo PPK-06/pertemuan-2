@@ -37,6 +37,14 @@
             <h1>{{ $taskList->name }}</h1>
             <p class="sub"><a href="{{ route('task-lists.index') }}">&larr; Kembali ke daftar tugas</a></p>
 
+            @can('delete', $taskList)
+                <form method="POST" action="{{ route('task-lists.destroy', $taskList) }}" style="margin-bottom:24px">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" style="padding:10px 16px;background:#a3352b;color:#fff;border:0;font-size:14px;cursor:pointer" onclick="return confirm('Hapus daftar tugas ini beserta seluruh keanggotaannya?')">Hapus Daftar Tugas</button>
+                </form>
+            @endcan
+
             <dl class="meta">
                 <dt>Deskripsi</dt>
                 <dd>

@@ -50,7 +50,7 @@ class TaskListSecurityTest extends TestCase
     // =========================================================================
 
     /** @test */
-    public function owner_can_view_their_task_list(): void
+    public function test_owner_can_view_their_task_list(): void
     {
         $owner    = $this->makeUser();
         $taskList = $this->makeTaskList($owner);
@@ -61,7 +61,7 @@ class TaskListSecurityTest extends TestCase
     }
 
     /** @test */
-    public function non_owner_is_forbidden_from_viewing_task_list(): void
+    public function test_non_owner_is_forbidden_from_viewing_task_list(): void
     {
         $owner    = $this->makeUser();
         $other    = $this->makeUser();
@@ -73,7 +73,7 @@ class TaskListSecurityTest extends TestCase
     }
 
     /** @test */
-    public function guest_is_redirected_when_viewing_task_list(): void
+    public function test_guest_is_redirected_when_viewing_task_list(): void
     {
         $owner    = $this->makeUser();
         $taskList = $this->makeTaskList($owner);
@@ -88,7 +88,7 @@ class TaskListSecurityTest extends TestCase
     // =========================================================================
 
     /** @test */
-    public function owner_can_delete_their_task_list(): void
+    public function test_owner_can_delete_their_task_list(): void
     {
         $owner    = $this->makeUser();
         $taskList = $this->makeTaskList($owner);
@@ -101,7 +101,7 @@ class TaskListSecurityTest extends TestCase
     }
 
     /** @test */
-    public function non_owner_is_forbidden_from_deleting_task_list(): void
+    public function test_non_owner_is_forbidden_from_deleting_task_list(): void
     {
         $owner    = $this->makeUser();
         $other    = $this->makeUser();
@@ -115,7 +115,7 @@ class TaskListSecurityTest extends TestCase
     }
 
     /** @test */
-    public function guest_is_redirected_when_deleting_task_list(): void
+    public function test_guest_is_redirected_when_deleting_task_list(): void
     {
         $owner    = $this->makeUser();
         $taskList = $this->makeTaskList($owner);
@@ -130,7 +130,7 @@ class TaskListSecurityTest extends TestCase
     // =========================================================================
 
     /** @test */
-    public function authenticated_user_can_access_index(): void
+    public function test_authenticated_user_can_access_index(): void
     {
         $user = $this->makeUser();
 
@@ -140,7 +140,7 @@ class TaskListSecurityTest extends TestCase
     }
 
     /** @test */
-    public function guest_is_redirected_from_index(): void
+    public function test_guest_is_redirected_from_index(): void
     {
         $this->get(route('task-lists.index'))
              ->assertStatus(302)
@@ -158,7 +158,7 @@ class TaskListSecurityTest extends TestCase
      *
      * @test
      */
-    public function sql_injection_in_name_is_stored_safely(): void
+    public function test_sql_injection_in_name_is_stored_safely(): void
     {
         $user    = $this->makeUser();
         $payload = "' OR '1'='1";
@@ -178,7 +178,7 @@ class TaskListSecurityTest extends TestCase
      *
      * @test
      */
-    public function sql_drop_injection_in_name_is_stored_safely(): void
+    public function test_sql_drop_injection_in_name_is_stored_safely(): void
     {
         $user    = $this->makeUser();
         $payload = '; DROP TABLE task_lists;--';
@@ -201,7 +201,7 @@ class TaskListSecurityTest extends TestCase
      *
      * @test
      */
-    public function xss_payload_in_name_is_stored_safely(): void
+    public function test_xss_payload_in_name_is_stored_safely(): void
     {
         $user    = $this->makeUser();
         $payload = '<script>alert(1)</script>';
@@ -221,7 +221,7 @@ class TaskListSecurityTest extends TestCase
      *
      * @test
      */
-    public function sql_injection_in_description_is_stored_safely(): void
+    public function test_sql_injection_in_description_is_stored_safely(): void
     {
         $user    = $this->makeUser();
         $payload = "' OR '1'='1";
@@ -244,7 +244,7 @@ class TaskListSecurityTest extends TestCase
      *
      * @test
      */
-    public function xss_payload_in_description_is_stored_safely(): void
+    public function test_xss_payload_in_description_is_stored_safely(): void
     {
         $user    = $this->makeUser();
         $payload = '<script>alert(1)</script>';
@@ -272,7 +272,7 @@ class TaskListSecurityTest extends TestCase
      *
      * @test
      */
-    public function feature_files_contain_no_raw_query_calls(): void
+    public function test_feature_files_contain_no_raw_query_calls(): void
     {
         $dangerousPatterns = ['whereRaw', 'DB::raw', 'selectRaw'];
 

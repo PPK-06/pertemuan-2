@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProjectController extends Controller
 {
@@ -17,28 +18,27 @@ class ProjectController extends Controller
 
     public function create()
     {
-        $users = User::all();
-
-        return view('projects.create', compact('users'));
+        return view('projects.create');
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'owner_id' => 'required|exists:users,id',
         ]);
 
-        $project = Project::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'owner_id' => $request->owner_id,
-        ]);
+        // owner_id diambil dari sesi login di server, TIDAK PERNAH dari request,
+        // konsisten dengan TaskListController (mencegah privilege escalation).
+        $project = DB::transaction(function () use ($data) {
+            $project = new Project($data);
+            $project->owner_id = auth()->id();
+            $project->save();
 
-        $project->members()->syncWithoutDetaching([
-            $request->owner_id
-        ]);
+            $project->members()->syncWithoutDetaching([$project->owner_id]);
+
+            return $project;
+        });
 
         return redirect()
             ->route('projects.index')

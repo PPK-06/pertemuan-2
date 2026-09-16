@@ -12,12 +12,6 @@
 <input type="text" name="name" required><br><br>
 <label>Deskripsi</label><br>
 <textarea name="description"></textarea><br><br>
-<label>Owner</label><br>
-<select name="owner_id" required>
-@foreach($users as $user)
-<option value="{{ $user->id }}">{{ $user->name }}</option>
-@endforeach
-</select><br><br>
 <button type="submit">Simpan</button>
 </form><br>
 <a href="{{ route('projects.index') }}">Kembali</a>

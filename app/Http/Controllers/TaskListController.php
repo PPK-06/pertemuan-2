@@ -6,6 +6,7 @@ use App\Http\Requests\StoreTaskListRequest;
 use App\Models\TaskList;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class TaskListController extends Controller
@@ -57,8 +58,28 @@ class TaskListController extends Controller
      */
     public function show(TaskList $taskList): View
     {
+        Gate::authorize('view', $taskList);
+
         $taskList->load(['owner', 'members']);
 
         return view('task-lists.show', compact('taskList'));
+    }
+
+    /**
+     * Hapus daftar tugas beserta seluruh keanggotaannya (FR-02).
+     * Atomik: hapus pivot + hapus daftar dalam satu transaksi,
+     * jika salah satu gagal seluruh perubahan di-rollback.
+     */
+    public function destroy(TaskList $taskList): RedirectResponse
+    {
+        Gate::authorize('delete', $taskList);
+
+        DB::transaction(function () use ($taskList) {
+            $taskList->members()->detach();
+            $taskList->delete();
+        });
+
+        return redirect()->route('task-lists.index')
+            ->with('success', 'Daftar tugas berhasil dihapus.');
     }
 }
