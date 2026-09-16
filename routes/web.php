@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 >>>>>>> origin/feature/user-admin
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TaskListController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -50,4 +51,17 @@ Route::middleware('auth')->group(function () {
         ->name('tasks.status');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Task List Routes — Ferdy (NFR-02 + NFR-03)
+| Semua route di bawah ini dijaga middleware 'auth'.
+| Otorisasi kepemilikan ditangani oleh TaskListPolicy.
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::resource('task-lists', TaskListController::class)
+         ->except(['edit', 'update']);   // hanya endpoint yang ada di SRS
+});
+
 Route::get('/dashboard', [DashboardController::class, 'index']);
+
