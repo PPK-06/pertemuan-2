@@ -45,6 +45,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('tasks', TaskController::class);
     Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])
         ->name('tasks.status');
+    Route::post('/tasks/{task}/members', [TaskController::class, 'addMember'])
+        ->name('tasks.members.add');
+    Route::delete('/tasks/{task}/members/{user}', [TaskController::class, 'removeMember'])
+        ->name('tasks.members.remove');
 });
 
 /*

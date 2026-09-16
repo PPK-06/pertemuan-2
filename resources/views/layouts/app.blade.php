@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Task Flow - To Do List')</title>
+    <title>@yield('title', 'Jara - To Do List')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        /* Transisi antar halaman: fade in saat masuk, fade out saat pindah */
+        #page { opacity: 0; transform: translateY(8px); }
+        #page.page-enter { opacity: 1; transform: none; transition: opacity .3s ease, transform .3s ease; }
+        #page.page-leave { opacity: 0; transform: translateY(6px); transition: opacity .16s ease, transform .16s ease; }
+        @media (prefers-reduced-motion: reduce) {
+            #page, #page.page-enter, #page.page-leave { opacity: 1; transform: none; transition: none; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
@@ -22,7 +29,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="font-bold text-lg tracking-tight text-slate-900">TaskFlow</a>
+                <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="font-bold text-lg tracking-tight text-slate-900">Jara</a>
 
                 @auth
                 <nav class="hidden md:flex items-center gap-1 ml-4 text-sm font-medium text-slate-500">
@@ -79,7 +86,7 @@
     @endif
 
     <!-- Main Content Area -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main id="page" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {{-- Dukungan header halaman lama (dashboard, projects, dsb.) --}}
         @hasSection('header')
         <div class="mb-6 flex items-center justify-between gap-4">
@@ -97,6 +104,36 @@
 
         @yield('content')
     </main>
+
+    <script>
+        // Fade in halus setiap halaman dimuat (termasuk back/forward cache).
+        (function () {
+            var page = document.getElementById('page');
+            if (!page) return;
+            function enter() {
+                page.classList.remove('page-leave');
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                        page.classList.add('page-enter');
+                    });
+                });
+            }
+            if (document.readyState === 'complete' || document.readyState === 'interactive') enter();
+            else document.addEventListener('DOMContentLoaded', enter);
+            window.addEventListener('pageshow', function (e) { if (e.persisted) enter(); });
+            // Fade out singkat saat klik link internal, supaya perpindahan terasa dinamis.
+            document.addEventListener('click', function (e) {
+                var a = e.target.closest('a[href]');
+                if (!a || a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                var url = new URL(a.getAttribute('href'), window.location.origin);
+                if (url.origin !== window.location.origin) return;
+                e.preventDefault();
+                page.classList.remove('page-enter');
+                page.classList.add('page-leave');
+                setTimeout(function () { window.location.href = url.toString(); }, 160);
+            });
+        })();
+    </script>
 
 </body>
 </html>

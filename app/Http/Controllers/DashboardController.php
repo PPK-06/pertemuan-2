@@ -10,8 +10,13 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $projectName = "Project JARA (Simulasi)";
-        $allTasks = Task::all();
+        $projectName = 'Jara';
+        // Hanya task milik user (owner atau anggota), konsisten dengan tasks.index.
+        $allTasks = Task::where(function ($query) {
+                $query->where('created_by', auth()->id())
+                    ->orWhereHas('assignees', fn ($q) => $q->where('users.id', auth()->id()));
+            })
+            ->get();
 
         $totalTask = $allTasks->count();
         $todoTask = $allTasks->where('status', 'todo')->count();
@@ -20,13 +25,20 @@ class DashboardController extends Controller
 
         $progressPercent = $totalTask > 0 ? round(($doneTask / $totalTask) * 100) : 0;
 
-        $upcomingTasks = Task::where('status', '!=', 'done')
+        $visible = function ($query) {
+            $query->where('created_by', auth()->id())
+                ->orWhereHas('assignees', fn ($q) => $q->where('users.id', auth()->id()));
+        };
+
+        $upcomingTasks = Task::where($visible)
+            ->where('status', '!=', 'done')
             ->where('due_date', '>=', Carbon::now())
             ->orderBy('due_date', 'asc')
             ->limit(5)
             ->get();
 
-        $overdueTasks = Task::where('status', '!=', 'done')
+        $overdueTasks = Task::where($visible)
+            ->where('status', '!=', 'done')
             ->where('due_date', '<', Carbon::now())
             ->orderBy('due_date', 'asc')
             ->get();

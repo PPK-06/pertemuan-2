@@ -122,11 +122,17 @@
 
                     <!-- Actions & Badge -->
                     <div class="flex items-center gap-3">
+                        @if($task->created_by === auth()->id())
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-indigo-50 text-indigo-700">Owner</span>
+                        @else
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">Anggota</span>
+                        @endif
                         <span class="px-2.5 py-1 text-xs font-semibold rounded-full {{ $task->completed ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
                             {{ $task->completed ? 'Selesai' : ($task->status === 'in_progress' ? 'Proses' : 'Pending') }}
                         </span>
 
-                        <!-- Action Buttons -->
+                        <!-- Action Buttons (hanya owner) -->
+                        @if($task->created_by === auth()->id())
                         <div class="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition">
                             <a href="{{ route('tasks.edit', $task) }}" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Edit">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -134,11 +140,12 @@
                             <form action="{{ route('tasks.destroy', $task) }}" method="POST" onsubmit="return confirm('Hapus tugas ini?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                                <button type="submit" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus (owner)">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                             </form>
                         </div>
+                        @endif
                     </div>
                 </div>
             @empty

@@ -51,6 +51,6 @@ class DatabaseSeeder extends Seeder
             'priority' => 'high',
             'status' => 'in_progress',
             'due_date' => now()->addDays(3),
-        ]);
+        ])->assignees()->attach($dhimas->id);
     }
 }
